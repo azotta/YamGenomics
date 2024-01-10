@@ -33,3 +33,4 @@ grep -f unique_genes_alata_map00040.txt ../OrthoFinder/OrthoFinder_Apr/Results_A
 ```
 grep -o 'Dala|[^ ]*' pectin_OG.txt > all_genes_pectin_OG.txt
 ```
+- We retrieved also the number of genes per OG and produced a binary matrix, to use on UpSetR graph (fromGeneCount_to_Binary.ipynb)
