@@ -34,3 +34,36 @@ grep -f unique_genes_alata_map00040.txt ../OrthoFinder/OrthoFinder_Apr/Results_A
 grep -o 'Dala|[^ ]*' pectin_OG.txt > all_genes_pectin_OG.txt
 ```
 - We retrieved also the number of genes per OG and produced a binary matrix, to use on UpSetR graph (fromGeneCount_to_Binary.ipynb)
+
+
+## Admixture and Fst Analyses
+
+To determine the genetic structure of our collection, we selected 107 diploid genotypes from the 127 sequenced. 
+Plink to convert vcf to bed
+```
+plink2 --vcf thin_filter_all_geno.vcf.gz --make-bed --out out_genotypes_diploid_thin
+```
+Use bed to obtain admixture for k from 1 to 15
+```
+for K in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15;
+do admixture --cv out_genotypes_diploid_thin.bed $K --method=block | tee log${K}.out; done
+```
+To calculate the Fst, from the file diploidGeno.3.Q (3 is the number chosen from the result of admixture) 
+
+1- Merge the file with the names from all the genotypes within the table
+```
+awk -f merge.awk list_diploids.txt diploidGeno.3.Q > result_admixture_diploid_reviewed.txt
+```
+2- Filter the columns for the minimum value (this case 0.75)
+```
+awk '{if ($2+0>0.75) print $0 "\t" "Cluster_1"; else if ($3+0>0.75) print $0 "\t" "Cluster_2"; else if ($4+0>0.75) print $0 "\t" "Cluster_3"; else print $0 "\t" "Admixture"}' result_admixture_diploid_reviewed.txt > result_with_clusters_075.txt
+```
+
+3- From the file "result_with_cluster_075.txt" prepare one file per cluster, to run the Fst
+
+4- Run vcftools to calculate the Fst of each pair of clusters (3 in total) 
+
+```
+vcftools --gzvcf thin_filter_all_geno.vcf.gz --weir-fst-pop cluster1.txt --weir-fst-pop cluster2.txt --fst-window-size 50000 --fst-window-step 10000 --out cluster1_x_cluster2
+```
+
