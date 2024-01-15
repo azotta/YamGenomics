@@ -50,20 +50,24 @@ do admixture --cv out_genotypes_diploid_thin.bed $K --method=block | tee log${K}
 ```
 To calculate the Fst, from the file diploidGeno.3.Q (3 is the number chosen from the result of admixture) 
 
-1- Merge the file with the names from all the genotypes within the table
+- Merge the file with the names from all the genotypes within the table
 ```
 awk -f merge.awk list_diploids.txt diploidGeno.3.Q > result_admixture_diploid_reviewed.txt
 ```
-2- Filter the columns for the minimum value (this case 0.75)
+- Filter the columns for the minimum value (this case 0.75)
 ```
 awk '{if ($2+0>0.75) print $0 "\t" "Cluster_1"; else if ($3+0>0.75) print $0 "\t" "Cluster_2"; else if ($4+0>0.75) print $0 "\t" "Cluster_3"; else print $0 "\t" "Admixture"}' result_admixture_diploid_reviewed.txt > result_with_clusters_075.txt
 ```
 
-3- From the file "result_with_cluster_075.txt" prepare one file per cluster, to run the Fst
+- From the file "result_with_cluster_075.txt" prepare one file per cluster, to run the Fst
 
-4- Run vcftools to calculate the Fst of each pair of clusters (3 in total) 
+- Run vcftools to calculate the Fst of each pair of clusters (3 in total) 
 
 ```
 vcftools --gzvcf thin_filter_all_geno.vcf.gz --weir-fst-pop cluster1.txt --weir-fst-pop cluster2.txt --fst-window-size 50000 --fst-window-step 10000 --out cluster1_x_cluster2
 ```
+
+- To define the cut-off value for each cluster comparison we used the R script (Fst_analysis.r). After analysis the same model showed the best results for all the three cluster comparisons (Weibull).
+
+
 
